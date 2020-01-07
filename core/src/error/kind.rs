@@ -52,7 +52,7 @@ impl ErrorKind {
 
     /// Deeply counts the number of errors this item represents.
     pub fn len(&self) -> usize {
-        if let ErrorKind::Multiple(ref items) = *self {
+        if let Self::Multiple(ref items) = *self {
             items.iter().map(Error::len).sum()
         } else {
             1
@@ -98,7 +98,7 @@ impl fmt::Display for ErrorKind {
 
 impl From<ErrorUnknownField> for ErrorKind {
     fn from(err: ErrorUnknownField) -> Self {
-        ErrorKind::UnknownField(err)
+        Self::UnknownField(err)
     }
 }
 
@@ -115,7 +115,7 @@ pub(in error) struct ErrorUnknownField {
 
 impl ErrorUnknownField {
     pub fn new<I: Into<String>>(name: I, did_you_mean: Option<String>) -> Self {
-        ErrorUnknownField {
+        Self {
             name: name.into(),
             did_you_mean,
         }
@@ -126,7 +126,7 @@ impl ErrorUnknownField {
         T: AsRef<str> + 'a,
         I: IntoIterator<Item = &'a T>,
     {
-        ErrorUnknownField::new(field, did_you_mean(field, alternates))
+        Self::new(field, did_you_mean(field, alternates))
     }
 
     #[cfg(feature = "diagnostics")]
@@ -149,13 +149,13 @@ impl ErrorUnknownField {
 
 impl From<String> for ErrorUnknownField {
     fn from(name: String) -> Self {
-        ErrorUnknownField::new(name, None)
+        Self::new(name, None)
     }
 }
 
 impl<'a> From<&'a str> for ErrorUnknownField {
     fn from(name: &'a str) -> Self {
-        ErrorUnknownField::new(name, None)
+        Self::new(name, None)
     }
 }
 

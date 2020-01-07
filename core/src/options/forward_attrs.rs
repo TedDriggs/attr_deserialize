@@ -13,19 +13,19 @@ pub enum ForwardAttrs {
 impl ForwardAttrs {
     /// Returns `true` if this will not forward any attributes.
     pub fn is_empty(&self) -> bool {
-        match *self {
-            ForwardAttrs::All => false,
-            ForwardAttrs::Only(ref list) => list.is_empty(),
+        match &self {
+            Self::All => false,
+            Self::Only(list) => list.is_empty(),
         }
     }
 }
 
 impl FromMeta for ForwardAttrs {
     fn from_word() -> Result<Self> {
-        Ok(ForwardAttrs::All)
+        Ok(Self::All)
     }
 
     fn from_list(nested: &[NestedMeta]) -> Result<Self> {
-        Ok(ForwardAttrs::Only(PathList::from_list(nested)?))
+        Ok(Self::Only(PathList::from_list(nested)?))
     }
 }

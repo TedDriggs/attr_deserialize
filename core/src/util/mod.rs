@@ -9,8 +9,8 @@ mod ident_string;
 mod ignored;
 mod over_ride;
 mod path_list;
-mod with_original;
 mod spanned_value;
+mod with_original;
 
 pub use self::ident_string::IdentString;
 pub use self::ignored::Ignored;
@@ -26,7 +26,7 @@ pub struct Flag(Option<()>);
 impl Flag {
     /// Creates a new `Flag` which corresponds to the presence of a value.
     pub fn present() -> Self {
-        Flag(Some(()))
+        Self(Some(()))
     }
 }
 
@@ -39,7 +39,7 @@ impl Deref for Flag {
 
 impl FromMeta for Flag {
     fn from_meta(mi: &syn::Meta) -> Result<Self> {
-        FromMeta::from_meta(mi).map(Flag)
+        FromMeta::from_meta(mi).map(Self)
     }
 }
 
@@ -52,16 +52,16 @@ impl From<Flag> for bool {
 impl From<bool> for Flag {
     fn from(v: bool) -> Self {
         if v {
-            Flag::present()
+            Self::present()
         } else {
-            Flag(None)
+            Self(None)
         }
     }
 }
 
 impl From<Option<()>> for Flag {
     fn from(v: Option<()>) -> Self {
-        Flag::from(v.is_some())
+        Self::from(v.is_some())
     }
 }
 
@@ -88,9 +88,9 @@ impl Not for Flag {
 
     fn not(self) -> Self {
         if self.is_some() {
-            Flag(None)
+            Self(None)
         } else {
-            Flag::present()
+            Self::present()
         }
     }
 }

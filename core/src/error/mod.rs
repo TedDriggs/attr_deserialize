@@ -37,13 +37,17 @@ pub struct Error {
 
 /// Transform a syn::Path to a readable String
 fn path_to_string(path: &syn::Path) -> String {
-    path.segments.iter().map(|s| s.ident.to_string()).collect::<Vec<String>>().join("::")
+    path.segments
+        .iter()
+        .map(|s| s.ident.to_string())
+        .collect::<Vec<String>>()
+        .join("::")
 }
 
 /// Error creation functions
 impl Error {
     pub(in error) fn new(kind: ErrorKind) -> Self {
-        Error {
+        Self {
             kind,
             locations: Vec::new(),
             span: None,
@@ -52,35 +56,35 @@ impl Error {
 
     /// Creates a new error with a custom message.
     pub fn custom<T: fmt::Display>(msg: T) -> Self {
-        Error::new(ErrorKind::Custom(msg.to_string()))
+        Self::new(ErrorKind::Custom(msg.to_string()))
     }
 
     /// Creates a new error for a field that appears twice in the input.
     pub fn duplicate_field(name: &str) -> Self {
-        Error::new(ErrorKind::DuplicateField(name.into()))
+        Self::new(ErrorKind::DuplicateField(name.into()))
     }
 
     /// Creates a new error for a field that appears twice in the input. Helper to avoid repeating
     /// the syn::Path to String conversion.
     pub fn duplicate_field_path(path: &Path) -> Self {
-        Error::duplicate_field(&path_to_string(path))
+        Self::duplicate_field(&path_to_string(path))
     }
 
     /// Creates a new error for a non-optional field that does not appear in the input.
     pub fn missing_field(name: &str) -> Self {
-        Error::new(ErrorKind::MissingField(name.into()))
+        Self::new(ErrorKind::MissingField(name.into()))
     }
 
     /// Creates a new error for a field name that appears in the input but does not correspond
     /// to a known field.
     pub fn unknown_field(name: &str) -> Self {
-        Error::new(ErrorKind::UnknownField(name.into()))
+        Self::new(ErrorKind::UnknownField(name.into()))
     }
 
     /// Creates a new error for a field name that appears in the input but does not correspond
     /// to a known field. Helper to avoid repeating the syn::Path to String conversion.
     pub fn unknown_field_path(path: &Path) -> Self {
-        Error::unknown_field(&path_to_string(path))
+        Self::unknown_field(&path_to_string(path))
     }
 
     /// Creates a new error for a field name that appears in the input but does not correspond to
@@ -91,21 +95,21 @@ impl Error {
         T: AsRef<str> + 'a,
         I: IntoIterator<Item = &'a T>,
     {
-        Error::new(ErrorUnknownField::with_alts(field, alternates).into())
+        Self::new(ErrorUnknownField::with_alts(field, alternates).into())
     }
 
     /// Creates a new error for a struct or variant that does not adhere to the supported shape.
     pub fn unsupported_shape(shape: &str) -> Self {
-        Error::new(ErrorKind::UnsupportedShape(shape.into()))
+        Self::new(ErrorKind::UnsupportedShape(shape.into()))
     }
 
     pub fn unsupported_format(format: &str) -> Self {
-        Error::new(ErrorKind::UnexpectedFormat(format.into()))
+        Self::new(ErrorKind::UnexpectedFormat(format.into()))
     }
 
     /// Creates a new error for a field which has an unexpected literal type.
     pub fn unexpected_type(ty: &str) -> Self {
-        Error::new(ErrorKind::UnexpectedType(ty.into()))
+        Self::new(ErrorKind::UnexpectedType(ty.into()))
     }
 
     /// Creates a new error for a field which has an unexpected literal type. This will automatically
@@ -138,7 +142,7 @@ impl Error {
     /// # fn main() {}
     /// ```
     pub fn unexpected_lit_type(lit: &Lit) -> Self {
-        Error::unexpected_type(match *lit {
+        Self::unexpected_type(match *lit {
             Lit::Str(_) => "string",
             Lit::ByteStr(_) => "byte string",
             Lit::Byte(_) => "byte",
@@ -153,33 +157,31 @@ impl Error {
 
     /// Creates a new error for a value which doesn't match a set of expected literals.
     pub fn unknown_value(value: &str) -> Self {
-        Error::new(ErrorKind::UnknownValue(value.into()))
+        Self::new(ErrorKind::UnknownValue(value.into()))
     }
 
     /// Creates a new error for a list which did not get enough items to proceed.
     pub fn too_few_items(min: usize) -> Self {
-        Error::new(ErrorKind::TooFewItems(min))
+        Self::new(ErrorKind::TooFewItems(min))
     }
 
     /// Creates a new error when a list got more items than it supports. The `max` argument
     /// is the largest number of items the receiver could accept.
     pub fn too_many_items(max: usize) -> Self {
-        Error::new(ErrorKind::TooManyItems(max))
+        Self::new(ErrorKind::TooManyItems(max))
     }
 
     /// Bundle a set of multiple errors into a single `Error` instance.
     ///
     /// # Panics
     /// This function will panic if `errors.is_empty() == true`.
-    pub fn multiple(mut errors: Vec<Error>) -> Self {
-        if errors.len() > 1 {
-            Error::new(ErrorKind::Multiple(errors))
-        } else if errors.len() == 1 {
-            errors
+    pub fn multiple(mut errors: Vec<Self>) -> Self {
+        match errors.len() {
+            0 => panic!("Can't deal with 0 errors"),
+            1 => errors
                 .pop()
-                .expect("Error array of length 1 has a first item")
-        } else {
-            panic!("Can't deal with 0 errors")
+                .expect("Error array of length 1 has a first item"),
+            _ => Self::new(ErrorKind::Multiple(errors)),
         }
     }
 }
@@ -189,11 +191,12 @@ impl Error {
     /// or permissible values. This function can be made public if the API proves useful
     /// beyond impls for `syn` types.
     pub(crate) fn unknown_lit_str_value(value: &LitStr) -> Self {
-        Error::unknown_value(&value.value()).with_span(value)
+        Self::unknown_value(&value.value()).with_span(value)
     }
 }
 
 /// Error instance methods
+#[allow(clippy::len_without_is_empty)]
 impl Error {
     /// Check if this error is associated with a span in the token stream.
     pub fn has_span(&self) -> bool {
@@ -221,7 +224,7 @@ impl Error {
 
     /// Recursively converts a tree of errors to a flattened list.
     pub fn flatten(self) -> Self {
-        Error::multiple(self.into_vec())
+        Self::multiple(self.into_vec())
     }
 
     fn into_vec(self) -> Vec<Self> {
@@ -376,10 +379,10 @@ impl Error {
 
 impl StdError for Error {
     fn description(&self) -> &str {
-        &self.kind.description()
+        self.kind.description()
     }
 
-    fn cause(&self) -> Option<&StdError> {
+    fn cause(&self) -> Option<&dyn StdError> {
         None
     }
 }
@@ -409,7 +412,7 @@ impl PartialEq for Error {
 impl Eq for Error {}
 
 impl IntoIterator for Error {
-    type Item = Error;
+    type Item = Self;
     type IntoIter = IntoIter;
 
     fn into_iter(self) -> IntoIter {
@@ -435,8 +438,8 @@ impl Iterator for IntoIterEnum {
 
     fn next(&mut self) -> Option<Self::Item> {
         match *self {
-            IntoIterEnum::Single(ref mut content) => content.next(),
-            IntoIterEnum::Multiple(ref mut content) => content.next(),
+            Self::Single(ref mut content) => content.next(),
+            Self::Multiple(ref mut content) => content.next(),
         }
     }
 }

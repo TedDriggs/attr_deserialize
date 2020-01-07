@@ -33,7 +33,7 @@ impl InputVariant {
     }
 
     pub fn from_variant(v: &syn::Variant, parent: Option<&Core>) -> Result<Self> {
-        let mut starter = (InputVariant {
+        let mut starter = (Self {
             ident: v.ident.clone(),
             attr_name: Default::default(),
             data: Fields::empty_from(&v.fields),
@@ -92,7 +92,7 @@ impl ParseAttribute for InputVariant {
             self.skip = FromMeta::from_meta(mi)?;
             Ok(())
         } else {
-            Err(Error::unknown_field_path(&path).with_span(mi))
+            Err(Error::unknown_field_path(path).with_span(mi))
         }
     }
 }

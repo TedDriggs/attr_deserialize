@@ -41,7 +41,7 @@ impl GenericParamExt for syn::GenericParam {
     type ConstParam = syn::ConstParam;
 
     fn as_type_param(&self) -> Option<&Self::TypeParam> {
-        if let syn::GenericParam::Type(ref val) = *self {
+        if let Self::Type(ref val) = *self {
             Some(val)
         } else {
             None
@@ -49,7 +49,7 @@ impl GenericParamExt for syn::GenericParam {
     }
 
     fn as_lifetime_def(&self) -> Option<&Self::LifetimeDef> {
-        if let syn::GenericParam::Lifetime(ref val) = *self {
+        if let Self::Lifetime(ref val) = *self {
             Some(val)
         } else {
             None
@@ -57,7 +57,7 @@ impl GenericParamExt for syn::GenericParam {
     }
 
     fn as_const_param(&self) -> Option<&Self::ConstParam> {
-        if let syn::GenericParam::Const(ref val) = *self {
+        if let Self::Const(ref val) = *self {
             Some(val)
         } else {
             None
@@ -66,7 +66,7 @@ impl GenericParamExt for syn::GenericParam {
 }
 
 impl GenericParamExt for syn::TypeParam {
-    type TypeParam = syn::TypeParam;
+    type TypeParam = Self;
     type LifetimeDef = ();
     type ConstParam = ();
 
@@ -85,20 +85,16 @@ pub enum GenericParam<T = syn::TypeParam, L = syn::LifetimeDef, C = syn::ConstPa
 
 impl<T: FromTypeParam> FromTypeParam for GenericParam<T> {
     fn from_type_param(type_param: &syn::TypeParam) -> Result<Self> {
-        Ok(GenericParam::Type(FromTypeParam::from_type_param(
-            type_param,
-        )?))
+        Ok(Self::Type(FromTypeParam::from_type_param(type_param)?))
     }
 }
 
 impl<T: FromTypeParam> FromGenericParam for GenericParam<T> {
     fn from_generic_param(param: &syn::GenericParam) -> Result<Self> {
         Ok(match *param {
-            syn::GenericParam::Type(ref ty) => {
-                GenericParam::Type(FromTypeParam::from_type_param(ty)?)
-            }
-            syn::GenericParam::Lifetime(ref val) => GenericParam::Lifetime(val.clone()),
-            syn::GenericParam::Const(ref val) => GenericParam::Const(val.clone()),
+            syn::GenericParam::Type(ref ty) => Self::Type(FromTypeParam::from_type_param(ty)?),
+            syn::GenericParam::Lifetime(ref val) => Self::Lifetime(val.clone()),
+            syn::GenericParam::Const(ref val) => Self::Const(val.clone()),
         })
     }
 }
@@ -109,7 +105,7 @@ impl<T, L, C> GenericParamExt for GenericParam<T, L, C> {
     type ConstParam = C;
 
     fn as_type_param(&self) -> Option<&T> {
-        if let GenericParam::Type(ref val) = *self {
+        if let Self::Type(ref val) = *self {
             Some(val)
         } else {
             None
@@ -117,7 +113,7 @@ impl<T, L, C> GenericParamExt for GenericParam<T, L, C> {
     }
 
     fn as_lifetime_def(&self) -> Option<&L> {
-        if let GenericParam::Lifetime(ref val) = *self {
+        if let Self::Lifetime(ref val) = *self {
             Some(val)
         } else {
             None
@@ -125,7 +121,7 @@ impl<T, L, C> GenericParamExt for GenericParam<T, L, C> {
     }
 
     fn as_const_param(&self) -> Option<&C> {
-        if let GenericParam::Const(ref val) = *self {
+        if let Self::Const(ref val) = *self {
             Some(val)
         } else {
             None
@@ -142,14 +138,14 @@ pub struct Generics<P, W = syn::WhereClause> {
 }
 
 impl<P, W> Generics<P, W> {
-    pub fn type_params<'a>(&'a self) -> TypeParams<'a, P> {
+    pub fn type_params(&self) -> TypeParams<'_, P> {
         TypeParams(self.params.iter())
     }
 }
 
 impl<P: FromGenericParam> FromGenerics for Generics<P> {
     fn from_generics(generics: &syn::Generics) -> Result<Self> {
-        Ok(Generics {
+        Ok(Self {
             params: generics
                 .params
                 .iter()

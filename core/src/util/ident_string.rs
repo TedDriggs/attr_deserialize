@@ -19,7 +19,7 @@ pub struct IdentString {
 impl IdentString {
     /// Create a new `IdentString`.
     pub fn new(ident: Ident) -> Self {
-        IdentString {
+        Self {
             string: ident.to_string(),
             ident,
         }
@@ -69,18 +69,18 @@ impl AsRef<str> for IdentString {
 
 impl From<Ident> for IdentString {
     fn from(ident: Ident) -> Self {
-        IdentString::new(ident)
+        Self::new(ident)
     }
 }
 
 impl From<IdentString> for Ident {
-    fn from(v: IdentString) -> Ident {
+    fn from(v: IdentString) -> Self {
         v.ident
     }
 }
 
 impl From<IdentString> for String {
-    fn from(v: IdentString) -> String {
+    fn from(v: IdentString) -> Self {
         v.string
     }
 }
@@ -131,7 +131,7 @@ impl fmt::Display for IdentString {
 
 impl FromMeta for IdentString {
     fn from_meta(item: &Meta) -> Result<Self> {
-        Ident::from_meta(item).map(IdentString::from)
+        Ident::from_meta(item).map(Self::from)
     }
 }
 

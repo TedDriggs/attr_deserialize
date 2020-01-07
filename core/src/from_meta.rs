@@ -145,7 +145,7 @@ impl FromMeta for bool {
 impl FromMeta for AtomicBool {
     fn from_meta(mi: &Meta) -> Result<Self> {
         FromMeta::from_meta(mi)
-            .map(AtomicBool::new)
+            .map(Self::new)
             .map_err(|e| e.with_span(mi))
     }
 }
@@ -217,7 +217,7 @@ from_meta_float!(f64);
 /// emitted span.
 impl FromMeta for syn::Ident {
     fn from_string(value: &str) -> Result<Self> {
-        Ok(syn::Ident::new(value, ::proc_macro2::Span::call_site()))
+        Ok(Self::new(value, ::proc_macro2::Span::call_site()))
     }
 
     fn from_value(value: &Lit) -> Result<Self> {
@@ -311,7 +311,7 @@ impl<T: FromMeta> FromMeta for Option<T> {
 
 impl<T: FromMeta> FromMeta for Box<T> {
     fn from_meta(item: &Meta) -> Result<Self> {
-        FromMeta::from_meta(item).map(Box::new)
+        FromMeta::from_meta(item).map(Self::new)
     }
 }
 
@@ -333,39 +333,42 @@ impl<T: FromMeta> FromMeta for ::std::result::Result<T, Meta> {
 
 impl<T: FromMeta> FromMeta for Rc<T> {
     fn from_meta(item: &Meta) -> Result<Self> {
-        FromMeta::from_meta(item).map(Rc::new)
+        FromMeta::from_meta(item).map(Self::new)
     }
 }
 
 impl<T: FromMeta> FromMeta for Arc<T> {
     fn from_meta(item: &Meta) -> Result<Self> {
-        FromMeta::from_meta(item).map(Arc::new)
+        FromMeta::from_meta(item).map(Self::new)
     }
 }
 
 impl<T: FromMeta> FromMeta for RefCell<T> {
     fn from_meta(item: &Meta) -> Result<Self> {
-        FromMeta::from_meta(item).map(RefCell::new)
+        FromMeta::from_meta(item).map(Self::new)
     }
 }
 
 impl<V: FromMeta, S: BuildHasher + Default> FromMeta for HashMap<String, V, S> {
     fn from_list(nested: &[syn::NestedMeta]) -> Result<Self> {
-        let mut map = HashMap::with_capacity_and_hasher(nested.len(), Default::default());
+        let mut map = Self::with_capacity_and_hasher(nested.len(), Default::default());
         for item in nested {
             if let syn::NestedMeta::Meta(ref inner) = *item {
                 let path = inner.path();
-                let name = path.segments.iter().map(|s| s.ident.to_string()).collect::<Vec<String>>().join("::");
+                let name = path
+                    .segments
+                    .iter()
+                    .map(|s| s.ident.to_string())
+                    .collect::<Vec<String>>()
+                    .join("::");
                 match map.entry(name) {
                     Entry::Occupied(_) => {
-                        return Err(
-                            Error::duplicate_field_path(&path).with_span(inner)
-                        );
+                        return Err(Error::duplicate_field_path(path).with_span(inner));
                     }
                     Entry::Vacant(entry) => {
                         // In the error case, extend the error's path, but assume the inner `from_meta`
                         // set the span, and that subsequently we don't have to.
-                        entry.insert(FromMeta::from_meta(inner).map_err(|e| e.at_path(&path))?);
+                        entry.insert(FromMeta::from_meta(inner).map_err(|e| e.at_path(path))?);
                     }
                 }
             }

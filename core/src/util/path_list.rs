@@ -22,12 +22,21 @@ pub struct PathList(Vec<Path>);
 impl PathList {
     /// Create a new list.
     pub fn new<T: Into<Path>>(vals: Vec<T>) -> Self {
-        PathList(vals.into_iter().map(T::into).collect())
+        Self(vals.into_iter().map(T::into).collect())
     }
 
     /// Create a new `Vec` containing the string representation of each path.
     pub fn to_strings(&self) -> Vec<String> {
-        self.0.iter().map(|p| p.segments.iter().map(|s| s.ident.to_string()).collect::<Vec<String>>().join("::")).collect()
+        self.0
+            .iter()
+            .map(|p| {
+                p.segments
+                    .iter()
+                    .map(|s| s.ident.to_string())
+                    .collect::<Vec<String>>()
+                    .join("::")
+            })
+            .collect()
     }
 }
 
@@ -41,7 +50,7 @@ impl Deref for PathList {
 
 impl From<Vec<Path>> for PathList {
     fn from(v: Vec<Path>) -> Self {
-        PathList(v)
+        Self(v)
     }
 }
 
@@ -56,7 +65,7 @@ impl FromMeta for PathList {
             }
         }
 
-        Ok(PathList(paths))
+        Ok(Self(paths))
     }
 }
 

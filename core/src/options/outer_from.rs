@@ -29,7 +29,7 @@ pub struct OuterFrom {
 
 impl OuterFrom {
     pub fn start(di: &syn::DeriveInput) -> Self {
-        OuterFrom {
+        Self {
             container: Core::start(di),
             attrs: Default::default(),
             ident: Default::default(),
@@ -53,7 +53,7 @@ impl ParseAttribute for OuterFrom {
             self.container.default = Some(DefaultExpression::Trait);
             self.from_ident = true;
         } else {
-            return self.container.parse_nested(mi)
+            return self.container.parse_nested(mi);
         }
         Ok(())
     }

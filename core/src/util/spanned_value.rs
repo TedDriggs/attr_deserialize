@@ -27,7 +27,7 @@ pub struct SpannedValue<T> {
 
 impl<T> SpannedValue<T> {
     pub fn new(value: T, span: Span) -> Self {
-        SpannedValue { value, span }
+        Self { value, span }
     }
 
     /// Get the source code location referenced by this struct.
@@ -38,7 +38,7 @@ impl<T> SpannedValue<T> {
 
 impl<T: Default> Default for SpannedValue<T> {
     fn default() -> Self {
-        SpannedValue::new(Default::default(), Span::call_site())
+        Self::new(Default::default(), Span::call_site())
     }
 }
 
@@ -66,7 +66,7 @@ macro_rules! spanned {
     ($trayt:ident, $method:ident, $syn:path) => {
         impl<T: $trayt> $trayt for SpannedValue<T> {
             fn $method(value: &$syn) -> Result<Self> {
-                Ok(SpannedValue::new(
+                Ok(Self::new(
                     $trayt::$method(value).map_err(|e| e.with_span(value))?,
                     value.span(),
                 ))
@@ -86,7 +86,7 @@ spanned!(FromVariant, from_variant, syn::Variant);
 impl<T: Spanned> From<T> for SpannedValue<T> {
     fn from(value: T) -> Self {
         let span = value.span();
-        SpannedValue::new(value, span)
+        Self::new(value, span)
     }
 }
 

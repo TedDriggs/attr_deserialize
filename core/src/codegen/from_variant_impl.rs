@@ -21,11 +21,13 @@ impl<'a> ToTokens for FromVariantImpl<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let input = self.param_name();
         let extractor = self.extractor();
-        let passed_ident = self.ident
+        let passed_ident = self
+            .ident
             .as_ref()
             .map(|i| quote!(#i: #input.ident.clone(),));
         let passed_attrs = self.attrs.as_ref().map(|i| quote!(#i: __fwd_attrs,));
-        let passed_fields = self.fields
+        let passed_fields = self
+            .fields
             .as_ref()
             .map(|i| quote!(#i: ::darling::ast::Fields::try_from(&#input.fields)?,));
 
@@ -51,27 +53,27 @@ impl<'a> ToTokens for FromVariantImpl<'a> {
 
         self.wrap(
             quote!(
-            fn from_variant(#input: &::syn::Variant) -> ::darling::Result<Self> {
-                #error_declaration
+                fn from_variant(#input: &::syn::Variant) -> ::darling::Result<Self> {
+                    #error_declaration
 
-                #extractor
+                    #extractor
 
-                #supports
+                    #supports
 
-                #require_fields
+                    #require_fields
 
-                #error_check
+                    #error_check
 
-                #default
+                    #default
 
-                ::darling::export::Ok(Self {
-                    #passed_ident
-                    #passed_attrs
-                    #passed_fields
-                    #inits
-                }) #map
-            }
-        ),
+                    ::darling::export::Ok(Self {
+                        #passed_ident
+                        #passed_attrs
+                        #passed_fields
+                        #inits
+                    }) #map
+                }
+            ),
             tokens,
         );
     }
@@ -87,7 +89,7 @@ impl<'a> ExtractAttribute for FromVariantImpl<'a> {
     }
 
     fn attr_names(&self) -> &PathList {
-        &self.attr_names
+        self.attr_names
     }
 
     fn forwarded_attrs(&self) -> Option<&ForwardAttrs> {

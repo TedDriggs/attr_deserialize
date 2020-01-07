@@ -116,7 +116,7 @@ impl<'a> ToTokens for MatchArm<'a> {
             // us one `if` check.
             let mut extractor =
                 quote!(#with_path(__inner).map_err(|e| e.with_span(&__inner).at(#location)));
-            if let Some(ref map) = field.map {
+            if let Some(map) = field.map {
                 extractor = quote!(#extractor.map(#map))
             }
 

@@ -32,14 +32,17 @@ impl<'a> ToTokens for FromTypeParamImpl<'a> {
             self.base.fallback_decl()
         };
 
-        let passed_ident = self.ident
+        let passed_ident = self
+            .ident
             .as_ref()
             .map(|i| quote!(#i: #input.ident.clone(),));
         let passed_attrs = self.attrs.as_ref().map(|i| quote!(#i: __fwd_attrs,));
-        let passed_bounds = self.bounds
+        let passed_bounds = self
+            .bounds
             .as_ref()
             .map(|i| quote!(#i: #input.bounds.clone().into_iter().collect::<Vec<_>>(),));
-        let passed_default = self.default
+        let passed_default = self
+            .default
             .as_ref()
             .map(|i| quote!(#i: #input.default.clone(),));
         let initializers = self.base.initializers();
@@ -75,7 +78,7 @@ impl<'a> ToTokens for FromTypeParamImpl<'a> {
 
 impl<'a> ExtractAttribute for FromTypeParamImpl<'a> {
     fn attr_names(&self) -> &PathList {
-        &self.attr_names
+        self.attr_names
     }
 
     fn forwarded_attrs(&self) -> Option<&ForwardAttrs> {

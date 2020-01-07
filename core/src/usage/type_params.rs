@@ -114,10 +114,10 @@ uses_type_params!(syn::Variant, fields);
 
 impl UsesTypeParams for syn::Data {
     fn uses_type_params<'a>(&self, options: &Options, type_set: &'a IdentSet) -> IdentRefSet<'a> {
-        match *self {
-            syn::Data::Struct(ref v) => v.uses_type_params(options, type_set),
-            syn::Data::Enum(ref v) => v.uses_type_params(options, type_set),
-            syn::Data::Union(ref v) => v.uses_type_params(options, type_set),
+        match &self {
+            Self::Struct(v) => v.uses_type_params(options, type_set),
+            Self::Enum(v) => v.uses_type_params(options, type_set),
+            Self::Union(v) => v.uses_type_params(options, type_set),
         }
     }
 }
@@ -137,7 +137,7 @@ impl UsesTypeParams for Ident {
 
 impl UsesTypeParams for syn::ReturnType {
     fn uses_type_params<'a>(&self, options: &Options, type_set: &'a IdentSet) -> IdentRefSet<'a> {
-        if let syn::ReturnType::Type(_, ref ty) = *self {
+        if let Self::Type(_, ty) = &self {
             ty.uses_type_params(options, type_set)
         } else {
             Default::default()
@@ -147,22 +147,22 @@ impl UsesTypeParams for syn::ReturnType {
 
 impl UsesTypeParams for Type {
     fn uses_type_params<'a>(&self, options: &Options, type_set: &'a IdentSet) -> IdentRefSet<'a> {
-        match *self {
-            Type::Slice(ref v) => v.uses_type_params(options, type_set),
-            Type::Array(ref v) => v.uses_type_params(options, type_set),
-            Type::Ptr(ref v) => v.uses_type_params(options, type_set),
-            Type::Reference(ref v) => v.uses_type_params(options, type_set),
-            Type::BareFn(ref v) => v.uses_type_params(options, type_set),
-            Type::Tuple(ref v) => v.uses_type_params(options, type_set),
-            Type::Path(ref v) => v.uses_type_params(options, type_set),
-            Type::Paren(ref v) => v.uses_type_params(options, type_set),
-            Type::Group(ref v) => v.uses_type_params(options, type_set),
-            Type::TraitObject(ref v) => v.uses_type_params(options, type_set),
-            Type::ImplTrait(ref v) => v.uses_type_params(options, type_set),
-            Type::Macro(_) | Type::Verbatim(_) | Type::Infer(_) | Type::Never(_) => {
+        match &self {
+            Self::Slice(v) => v.uses_type_params(options, type_set),
+            Self::Array(v) => v.uses_type_params(options, type_set),
+            Self::Ptr(v) => v.uses_type_params(options, type_set),
+            Self::Reference(v) => v.uses_type_params(options, type_set),
+            Self::BareFn(v) => v.uses_type_params(options, type_set),
+            Self::Tuple(v) => v.uses_type_params(options, type_set),
+            Self::Path(v) => v.uses_type_params(options, type_set),
+            Self::Paren(v) => v.uses_type_params(options, type_set),
+            Self::Group(v) => v.uses_type_params(options, type_set),
+            Self::TraitObject(v) => v.uses_type_params(options, type_set),
+            Self::ImplTrait(v) => v.uses_type_params(options, type_set),
+            Self::Macro(_) | Self::Verbatim(_) | Self::Infer(_) | Self::Never(_) => {
                 Default::default()
-            },
-            _ => panic!("Unknown syn::Type: {:?}", self)
+            }
+            _ => panic!("Unknown syn::Type: {:?}", self),
         }
     }
 }
@@ -204,42 +204,40 @@ impl UsesTypeParams for syn::Path {
 
 impl UsesTypeParams for syn::PathArguments {
     fn uses_type_params<'a>(&self, options: &Options, type_set: &'a IdentSet) -> IdentRefSet<'a> {
-        match *self {
-            syn::PathArguments::None => Default::default(),
-            syn::PathArguments::AngleBracketed(ref v) => v.uses_type_params(options, type_set),
-            syn::PathArguments::Parenthesized(ref v) => v.uses_type_params(options, type_set),
+        match &self {
+            Self::None => Default::default(),
+            Self::AngleBracketed(v) => v.uses_type_params(options, type_set),
+            Self::Parenthesized(v) => v.uses_type_params(options, type_set),
         }
     }
 }
 
 impl UsesTypeParams for syn::WherePredicate {
     fn uses_type_params<'a>(&self, options: &Options, type_set: &'a IdentSet) -> IdentRefSet<'a> {
-        match *self {
-            syn::WherePredicate::Lifetime(_) => Default::default(),
-            syn::WherePredicate::Type(ref v) => v.uses_type_params(options, type_set),
-            syn::WherePredicate::Eq(ref v) => v.uses_type_params(options, type_set),
+        match &self {
+            Self::Lifetime(_) => Default::default(),
+            Self::Type(v) => v.uses_type_params(options, type_set),
+            Self::Eq(v) => v.uses_type_params(options, type_set),
         }
     }
 }
 
 impl UsesTypeParams for syn::GenericArgument {
     fn uses_type_params<'a>(&self, options: &Options, type_set: &'a IdentSet) -> IdentRefSet<'a> {
-        match *self {
-            syn::GenericArgument::Type(ref v) => v.uses_type_params(options, type_set),
-            syn::GenericArgument::Binding(ref v) => v.uses_type_params(options, type_set),
-            syn::GenericArgument::Constraint(ref v) => v.uses_type_params(options, type_set),
-            syn::GenericArgument::Const(_) | syn::GenericArgument::Lifetime(_) => {
-                Default::default()
-            }
+        match &self {
+            Self::Type(v) => v.uses_type_params(options, type_set),
+            Self::Binding(v) => v.uses_type_params(options, type_set),
+            Self::Constraint(v) => v.uses_type_params(options, type_set),
+            Self::Const(_) | Self::Lifetime(_) => Default::default(),
         }
     }
 }
 
 impl UsesTypeParams for syn::TypeParamBound {
     fn uses_type_params<'a>(&self, options: &Options, type_set: &'a IdentSet) -> IdentRefSet<'a> {
-        match *self {
-            syn::TypeParamBound::Trait(ref v) => v.uses_type_params(options, type_set),
-            syn::TypeParamBound::Lifetime(_) => Default::default(),
+        match &self {
+            Self::Trait(ref v) => v.uses_type_params(options, type_set),
+            Self::Lifetime(_) => Default::default(),
         }
     }
 }

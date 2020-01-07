@@ -112,7 +112,7 @@ impl<'a> ToTokens for DataMatchArm<'a> {
 
         if val.data.is_struct() {
             let declare_errors = ErrorDeclaration::default();
-            let check_errors = ErrorCheck::with_location(&name_in_attr);
+            let check_errors = ErrorCheck::with_location(name_in_attr);
             let require_fields = vdg.require_fields();
             let decls = vdg.declarations();
             let core_loop = vdg.core_loop();

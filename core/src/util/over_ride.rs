@@ -4,8 +4,6 @@ use syn::{Lit, NestedMeta};
 
 use {FromMeta, Result};
 
-use self::Override::*;
-
 /// A value which can inherit a default value or have an explicit value specified.
 ///
 /// # Usage
@@ -49,44 +47,44 @@ impl<T> Override<T> {
     /// Converts from `Override<T>` to `Override<&T>`.
     ///
     /// Produces a new `Override`, containing a reference into the original, leaving the original in place.
-    pub fn as_ref<'a>(&'a self) -> Override<&'a T> {
-        match *self {
-            Inherit => Inherit,
-            Explicit(ref val) => Explicit(val),
+    pub fn as_ref(&self) -> Override<&T> {
+        match &self {
+            Self::Inherit => Override::Inherit,
+            Self::Explicit(val) => Override::Explicit(val),
         }
     }
 
     /// Converts from `Override<T>` to `Override<&mut T>`.
     ///
     /// Produces a new `Override`, containing a mutable reference into the original.
-    pub fn as_mut<'a>(&'a mut self) -> Override<&'a mut T> {
-        match *self {
-            Inherit => Inherit,
-            Explicit(ref mut val) => Explicit(val),
+    pub fn as_mut(&mut self) -> Override<&mut T> {
+        match self {
+            Self::Inherit => Override::Inherit,
+            Self::Explicit(val) => Override::Explicit(val),
         }
     }
 
     /// Returns `true` if the override is an `Explicit` value.
     pub fn is_explicit(&self) -> bool {
         match *self {
-            Inherit => false,
-            Explicit(_) => true,
+            Self::Inherit => false,
+            Self::Explicit(_) => true,
         }
     }
 
     /// Converts from `Override<T>` to `Option<T>`.
     pub fn explicit(self) -> Option<T> {
         match self {
-            Inherit => None,
-            Explicit(val) => Some(val),
+            Self::Inherit => None,
+            Self::Explicit(val) => Some(val),
         }
     }
 
     /// Unwraps an override, yielding the content of an `Explicit`. Otherwise, it returns `optb`.
     pub fn unwrap_or(self, optb: T) -> T {
         match self {
-            Inherit => optb,
-            Explicit(val) => val,
+            Self::Inherit => optb,
+            Self::Explicit(val) => val,
         }
     }
 
@@ -96,8 +94,8 @@ impl<T> Override<T> {
         F: FnOnce() -> T,
     {
         match self {
-            Inherit => op(),
-            Explicit(val) => val,
+            Self::Inherit => op(),
+            Self::Explicit(val) => val,
         }
     }
 }
@@ -111,15 +109,15 @@ impl<T: Default> Override<T> {
 
 impl<T> Default for Override<T> {
     fn default() -> Self {
-        Inherit
+        Self::Inherit
     }
 }
 
 impl<T> From<Option<T>> for Override<T> {
     fn from(v: Option<T>) -> Self {
         match v {
-            None => Inherit,
-            Some(val) => Explicit(val),
+            None => Self::Inherit,
+            Some(val) => Self::Explicit(val),
         }
     }
 }
@@ -127,8 +125,8 @@ impl<T> From<Option<T>> for Override<T> {
 impl<T: fmt::Display> fmt::Display for Override<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Inherit => write!(f, "Inherit"),
-            Explicit(ref val) => write!(f, "Explicit `{}`", val),
+            Self::Inherit => write!(f, "Inherit"),
+            Self::Explicit(ref val) => write!(f, "Explicit `{}`", val),
         }
     }
 }
@@ -137,14 +135,14 @@ impl<T: fmt::Display> fmt::Display for Override<T> {
 /// any value will be forwarded to `T::from_meta`.
 impl<T: FromMeta> FromMeta for Override<T> {
     fn from_word() -> Result<Self> {
-        Ok(Inherit)
+        Ok(Self::Inherit)
     }
 
     fn from_list(items: &[NestedMeta]) -> Result<Self> {
-        Ok(Explicit(FromMeta::from_list(items)?))
+        Ok(Self::Explicit(FromMeta::from_list(items)?))
     }
 
     fn from_value(lit: &Lit) -> Result<Self> {
-        Ok(Explicit(FromMeta::from_value(lit)?))
+        Ok(Self::Explicit(FromMeta::from_value(lit)?))
     }
 }

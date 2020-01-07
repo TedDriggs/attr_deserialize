@@ -17,7 +17,7 @@ macro_rules! ignored {
     ($trayt:ident, $method:ident, $syn:path) => {
         impl $trayt for Ignored {
             fn $method(_: &$syn) -> Result<Self> {
-                Ok(Ignored)
+                Ok(Self)
             }
         }
     };

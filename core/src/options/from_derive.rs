@@ -23,7 +23,7 @@ pub struct FdiOptions {
 
 impl FdiOptions {
     pub fn new(di: &syn::DeriveInput) -> Result<Self> {
-        (FdiOptions {
+        (Self {
             base: OuterFrom::start(di),
             vis: Default::default(),
             generics: Default::default(),

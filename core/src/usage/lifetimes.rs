@@ -149,9 +149,9 @@ impl UsesLifetimes for syn::Data {
         lifetimes: &'a LifetimeSet,
     ) -> LifetimeRefSet<'a> {
         match *self {
-            syn::Data::Struct(ref v) => v.uses_lifetimes(options, lifetimes),
-            syn::Data::Enum(ref v) => v.uses_lifetimes(options, lifetimes),
-            syn::Data::Union(ref v) => v.uses_lifetimes(options, lifetimes),
+            Self::Struct(ref v) => v.uses_lifetimes(options, lifetimes),
+            Self::Enum(ref v) => v.uses_lifetimes(options, lifetimes),
+            Self::Union(ref v) => v.uses_lifetimes(options, lifetimes),
         }
     }
 }
@@ -162,22 +162,22 @@ impl UsesLifetimes for Type {
         options: &Options,
         lifetimes: &'a LifetimeSet,
     ) -> LifetimeRefSet<'a> {
-        match *self {
-            Type::Slice(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::Array(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::Ptr(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::Reference(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::BareFn(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::Tuple(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::Path(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::Paren(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::Group(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::TraitObject(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::ImplTrait(ref v) => v.uses_lifetimes(options, lifetimes),
-            Type::Macro(_) | Type::Verbatim(_) | Type::Infer(_) | Type::Never(_) => {
+        match &self {
+            Self::Slice(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Array(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Ptr(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Reference(v) => v.uses_lifetimes(options, lifetimes),
+            Self::BareFn(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Tuple(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Path(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Paren(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Group(v) => v.uses_lifetimes(options, lifetimes),
+            Self::TraitObject(v) => v.uses_lifetimes(options, lifetimes),
+            Self::ImplTrait(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Macro(_) | Self::Verbatim(_) | Self::Infer(_) | Self::Never(_) => {
                 Default::default()
-            },
-            _ => panic!("Unknown syn::Type: {:?}", self)
+            }
+            _ => panic!("Unknown syn::Type: {:?}", self),
         }
     }
 }
@@ -214,7 +214,7 @@ impl UsesLifetimes for syn::ReturnType {
         options: &Options,
         lifetimes: &'a LifetimeSet,
     ) -> LifetimeRefSet<'a> {
-        if let syn::ReturnType::Type(_, ref ty) = *self {
+        if let Self::Type(_, ref ty) = *self {
             ty.uses_lifetimes(options, lifetimes)
         } else {
             Default::default()
@@ -228,10 +228,10 @@ impl UsesLifetimes for syn::PathArguments {
         options: &Options,
         lifetimes: &'a LifetimeSet,
     ) -> LifetimeRefSet<'a> {
-        match *self {
-            syn::PathArguments::None => Default::default(),
-            syn::PathArguments::AngleBracketed(ref v) => v.uses_lifetimes(options, lifetimes),
-            syn::PathArguments::Parenthesized(ref v) => v.uses_lifetimes(options, lifetimes),
+        match &self {
+            Self::None => Default::default(),
+            Self::AngleBracketed(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Parenthesized(v) => v.uses_lifetimes(options, lifetimes),
         }
     }
 }
@@ -242,10 +242,10 @@ impl UsesLifetimes for syn::WherePredicate {
         options: &Options,
         lifetimes: &'a LifetimeSet,
     ) -> LifetimeRefSet<'a> {
-        match *self {
-            syn::WherePredicate::Type(ref v) => v.uses_lifetimes(options, lifetimes),
-            syn::WherePredicate::Lifetime(ref v) => v.uses_lifetimes(options, lifetimes),
-            syn::WherePredicate::Eq(ref v) => v.uses_lifetimes(options, lifetimes),
+        match &self {
+            Self::Type(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Lifetime(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Eq(v) => v.uses_lifetimes(options, lifetimes),
         }
     }
 }
@@ -256,12 +256,12 @@ impl UsesLifetimes for syn::GenericArgument {
         options: &Options,
         lifetimes: &'a LifetimeSet,
     ) -> LifetimeRefSet<'a> {
-        match *self {
-            syn::GenericArgument::Type(ref v) => v.uses_lifetimes(options, lifetimes),
-            syn::GenericArgument::Binding(ref v) => v.uses_lifetimes(options, lifetimes),
-            syn::GenericArgument::Lifetime(ref v) => v.uses_lifetimes(options, lifetimes),
-            syn::GenericArgument::Constraint(ref v) => v.uses_lifetimes(options, lifetimes),
-            syn::GenericArgument::Const(_) => Default::default(),
+        match &self {
+            Self::Type(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Binding(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Lifetime(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Constraint(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Const(_) => Default::default(),
         }
     }
 }
@@ -272,9 +272,9 @@ impl UsesLifetimes for syn::TypeParamBound {
         options: &Options,
         lifetimes: &'a LifetimeSet,
     ) -> LifetimeRefSet<'a> {
-        match *self {
-            syn::TypeParamBound::Trait(ref v) => v.uses_lifetimes(options, lifetimes),
-            syn::TypeParamBound::Lifetime(ref v) => v.uses_lifetimes(options, lifetimes),
+        match &self {
+            Self::Trait(v) => v.uses_lifetimes(options, lifetimes),
+            Self::Lifetime(v) => v.uses_lifetimes(options, lifetimes),
         }
     }
 }

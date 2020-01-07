@@ -1,7 +1,9 @@
 use syn;
 
-use {FromDeriveInput, FromField, FromGenericParam, FromGenerics, FromMeta, FromTypeParam,
-     FromVariant, Result};
+use {
+    FromDeriveInput, FromField, FromGenericParam, FromGenerics, FromMeta, FromTypeParam,
+    FromVariant, Result,
+};
 
 /// A container to parse some syntax and retain access to the original.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -12,7 +14,7 @@ pub struct WithOriginal<T, O> {
 
 impl<T, O> WithOriginal<T, O> {
     pub fn new(parsed: T, original: O) -> Self {
-        WithOriginal { parsed, original }
+        Self { parsed, original }
     }
 }
 
@@ -20,7 +22,7 @@ macro_rules! with_original {
     ($trayt:ident, $func:ident, $syn:path) => {
         impl<T: $trayt> $trayt for WithOriginal<T, $syn> {
             fn $func(value: &$syn) -> Result<Self> {
-                Ok(WithOriginal::new($trayt::$func(value)?, value.clone()))
+                Ok(Self::new($trayt::$func(value)?, value.clone()))
             }
         }
     };

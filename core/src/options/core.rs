@@ -42,7 +42,7 @@ pub struct Core {
 impl Core {
     /// Partially initializes `Core` by reading the identity, generics, and body shape.
     pub fn start(di: &syn::DeriveInput) -> Self {
-        Core {
+        Self {
             ident: di.ident.clone(),
             generics: di.generics.clone(),
             data: Data::empty_from(&di.data),
@@ -60,7 +60,7 @@ impl Core {
         }
     }
 
-    fn as_codegen_default<'a>(&'a self) -> Option<codegen::DefaultExpression<'a>> {
+    fn as_codegen_default(&self) -> Option<codegen::DefaultExpression<'_>> {
         self.default.as_ref().map(|expr| match *expr {
             DefaultExpression::Explicit(ref path) => codegen::DefaultExpression::Explicit(path),
             DefaultExpression::Inherit | DefaultExpression::Trait => {
@@ -76,7 +76,7 @@ impl ParseAttribute for Core {
 
         if path.is_ident("default") {
             if self.default.is_some() {
-                return Err(Error::duplicate_field("default").with_span(mi))
+                return Err(Error::duplicate_field("default").with_span(mi));
             }
 
             self.default = FromMeta::from_meta(mi)?;
@@ -86,7 +86,7 @@ impl ParseAttribute for Core {
             self.rename_rule = FromMeta::from_meta(mi)?;
         } else if path.is_ident("map") {
             if self.map.is_some() {
-                return Err(Error::duplicate_field("map").with_span(mi))
+                return Err(Error::duplicate_field("map").with_span(mi));
             }
 
             self.map = FromMeta::from_meta(mi)?;
@@ -94,12 +94,12 @@ impl ParseAttribute for Core {
             self.bound = FromMeta::from_meta(mi)?;
         } else if path.is_ident("allow_unknown_fields") {
             if self.allow_unknown_fields.is_some() {
-                return Err(Error::duplicate_field("allow_unknown_fields").with_span(mi))
+                return Err(Error::duplicate_field("allow_unknown_fields").with_span(mi));
             }
 
             self.allow_unknown_fields = FromMeta::from_meta(mi)?;
         } else {
-            return Err(Error::unknown_field_path(&path).with_span(mi))
+            return Err(Error::unknown_field_path(path).with_span(mi));
         }
 
         Ok(())
@@ -108,7 +108,7 @@ impl ParseAttribute for Core {
 
 impl ParseData for Core {
     fn parse_variant(&mut self, variant: &syn::Variant) -> Result<()> {
-        let v = InputVariant::from_variant(variant, Some(&self))?;
+        let v = InputVariant::from_variant(variant, Some(self))?;
 
         match self.data {
             Data::Enum(ref mut variants) => {
@@ -120,7 +120,7 @@ impl ParseData for Core {
     }
 
     fn parse_field(&mut self, field: &syn::Field) -> Result<()> {
-        let f = InputField::from_field(field, Some(&self))?;
+        let f = InputField::from_field(field, Some(self))?;
 
         match self.data {
             Data::Struct(Fields {

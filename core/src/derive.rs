@@ -29,7 +29,7 @@ pub fn from_meta(input: &DeriveInput) -> TokenStream {
 /// the input cannot produce a valid impl, the returned tokens will contain
 /// compile errors instead.
 pub fn from_derive_input(input: &DeriveInput) -> TokenStream {
-    emit_impl_or_error!(options::FdiOptions::new(&input))
+    emit_impl_or_error!(options::FdiOptions::new(input))
 }
 
 /// Create tokens for a `darling::FromField` impl from a `DeriveInput`. If

@@ -23,7 +23,7 @@ pub struct InputField {
 
 impl InputField {
     /// Generate a view into this field that can be used for code generation.
-    pub fn as_codegen_field<'a>(&'a self) -> codegen::Field<'a> {
+    pub fn as_codegen_field(&self) -> codegen::Field<'_> {
         codegen::Field {
             ident: &self.ident,
             name_in_attr: self
@@ -44,7 +44,7 @@ impl InputField {
 
     /// Generate a codegen::DefaultExpression for this field. This requires the field name
     /// in the `Inherit` case.
-    fn as_codegen_default<'a>(&'a self) -> Option<codegen::DefaultExpression<'a>> {
+    fn as_codegen_default(&self) -> Option<codegen::DefaultExpression<'_>> {
         self.default.as_ref().map(|expr| match *expr {
             DefaultExpression::Explicit(ref path) => codegen::DefaultExpression::Explicit(path),
             DefaultExpression::Inherit => codegen::DefaultExpression::Inherit(&self.ident),
@@ -53,7 +53,7 @@ impl InputField {
     }
 
     fn new(ident: syn::Ident, ty: syn::Type) -> Self {
-        InputField {
+        Self {
             ident,
             ty,
             attr_name: None,
@@ -130,7 +130,7 @@ impl ParseAttribute for InputField {
         } else if path.is_ident("multiple") {
             self.multiple = FromMeta::from_meta(mi)?;
         } else {
-            return Err(Error::unknown_field_path(path).with_span(mi))
+            return Err(Error::unknown_field_path(path).with_span(mi));
         }
 
         Ok(())

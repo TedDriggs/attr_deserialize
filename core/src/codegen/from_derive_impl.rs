@@ -43,20 +43,23 @@ impl<'a> ToTokens for FromDeriveInputImpl<'a> {
             }
         }
 
-        let passed_ident = self.ident
+        let passed_ident = self
+            .ident
             .as_ref()
             .map(|i| quote!(#i: #input.ident.clone(),));
         let passed_vis = self.vis.as_ref().map(|i| quote!(#i: #input.vis.clone(),));
-        let passed_generics = self.generics
+        let passed_generics = self
+            .generics
             .as_ref()
             .map(|i| quote!(#i: ::darling::FromGenerics::from_generics(&#input.generics)?,));
         let passed_attrs = self.attrs.as_ref().map(|i| quote!(#i: __fwd_attrs,));
-        let passed_body = self.data
+        let passed_body = self
+            .data
             .as_ref()
             .map(|i| quote!(#i: ::darling::ast::Data::try_from(&#input.data)?,));
 
         let supports = self.supports.map(|i| {
-            quote!{
+            quote! {
                 #i
                 __validate_body(&#input.data)?;
             }
@@ -107,7 +110,7 @@ impl<'a> ToTokens for FromDeriveInputImpl<'a> {
 
 impl<'a> ExtractAttribute for FromDeriveInputImpl<'a> {
     fn attr_names(&self) -> &PathList {
-        &self.attr_names
+        self.attr_names
     }
 
     fn forwarded_attrs(&self) -> Option<&ForwardAttrs> {

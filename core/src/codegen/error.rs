@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream;
-use quote::{TokenStreamExt, ToTokens};
+use quote::{ToTokens, TokenStreamExt};
 
 /// Declares the local variable into which errors will be accumulated.
 #[derive(Default)]
@@ -33,7 +33,7 @@ impl<'a> ErrorCheck<'a> {
 
 impl<'a> ToTokens for ErrorCheck<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let at_call = if let Some(ref s) = self.location {
+        let at_call = if let Some(s) = self.location {
             quote!(.at(#s))
         } else {
             quote!()

@@ -15,7 +15,7 @@ pub struct FromVariantOptions {
 
 impl FromVariantOptions {
     pub fn new(di: &DeriveInput) -> Result<Self> {
-        (FromVariantOptions {
+        (Self {
             base: OuterFrom::start(di),
             fields: Default::default(),
             supports: Default::default(),

@@ -34,7 +34,7 @@ impl<'a> TraitImpl<'a> {
         self.type_params_matching(|f| !f.skip, |v| !v.skip)
     }
 
-    fn type_params_matching<'b, F, V>(&'b self, field_filter: F, variant_filter: V) -> IdentSet
+    fn type_params_matching<F, V>(&self, field_filter: F, variant_filter: V) -> IdentSet
     where
         F: Fn(&&Field) -> bool,
         V: Fn(&&Variant) -> bool,

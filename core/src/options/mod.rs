@@ -39,11 +39,11 @@ pub enum DefaultExpression {
 #[doc(hidden)]
 impl FromMeta for DefaultExpression {
     fn from_word() -> Result<Self> {
-        Ok(DefaultExpression::Trait)
+        Ok(Self::Trait)
     }
 
     fn from_value(value: &syn::Lit) -> Result<Self> {
-        syn::Path::from_value(value).map(DefaultExpression::Explicit)
+        syn::Path::from_value(value).map(Self::Explicit)
     }
 }
 
