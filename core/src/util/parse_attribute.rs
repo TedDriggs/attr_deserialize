@@ -1,4 +1,4 @@
-use crate::{util::SpannedValue, Error, Result};
+use crate::{Error, Result};
 use std::fmt;
 use syn::{punctuated::Pair, spanned::Spanned, token, Attribute, Meta, MetaList, Path};
 
@@ -18,8 +18,9 @@ pub fn parse_attribute_to_meta_list(attr: &Attribute) -> Result<MetaList> {
             paren_token: token::Paren(attr.span()),
             nested: Default::default(),
         }),
-        Err(e) => Err(Error::custom(format!("Unable to parse attribute: {}", e))
-            .with_span(&SpannedValue::new((), e.span()))),
+        Err(e) => {
+            Err(Error::custom(format!("Unable to parse attribute: {}", e)).with_span(&e.span()))
+        }
     }
 }
 
