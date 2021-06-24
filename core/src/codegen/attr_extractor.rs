@@ -25,10 +25,10 @@ pub trait ExtractAttribute {
     fn core_loop(&self) -> TokenStream;
 
     fn declarations(&self) -> TokenStream {
-        if !self.attr_names().is_empty() {
-            self.local_declarations()
-        } else {
+        if self.attr_names().is_empty() {
             self.immutable_declarations()
+        } else {
+            self.local_declarations()
         }
     }
 

@@ -147,13 +147,12 @@ impl ParseAttribute for InputField {
             if let Some(post_transform) = &self.post_transform {
                 if transformer == post_transform.transformer {
                     return Err(Error::duplicate_field_path(path).with_span(mi));
-                } else {
-                    return Err(Error::custom(format!(
-                        "Options `{}` and `{}` are mutually exclusive",
-                        transformer, post_transform.transformer
-                    ))
-                    .with_span(mi));
                 }
+                return Err(Error::custom(format!(
+                    "Options `{}` and `{}` are mutually exclusive",
+                    transformer, post_transform.transformer
+                ))
+                .with_span(mi));
             }
 
             self.post_transform = Some(codegen::PostfixTransform::new(

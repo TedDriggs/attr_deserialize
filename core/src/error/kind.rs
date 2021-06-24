@@ -80,10 +80,10 @@ impl fmt::Display for ErrorKind {
                 write!(f, "Multiple errors: (")?;
                 let mut first = true;
                 for item in items {
-                    if !first {
-                        write!(f, ", ")?;
-                    } else {
+                    if first {
                         first = false;
+                    } else {
+                        write!(f, ", ")?;
                     }
 
                     item.fmt(f)?;

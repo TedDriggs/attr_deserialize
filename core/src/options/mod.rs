@@ -66,10 +66,10 @@ pub trait ParseAttribute: Sized {
             }
         }
 
-        if !errors.is_empty() {
-            Err(Error::multiple(errors))
-        } else {
+        if errors.is_empty() {
             Ok(self)
+        } else {
+            Err(Error::multiple(errors))
         }
     }
 
@@ -89,10 +89,10 @@ fn parse_attr<T: ParseAttribute>(attr: &syn::Attribute, target: &mut T) -> Resul
                 }
             }
 
-            if !errors.is_empty() {
-                Err(Error::multiple(errors))
-            } else {
+            if errors.is_empty() {
                 Ok(())
+            } else {
+                Err(Error::multiple(errors))
             }
         }
         Some(ref item) => panic!("Wasn't able to parse: `{:?}`", item),
@@ -131,10 +131,10 @@ pub trait ParseData: Sized {
             Data::Union(_) => unreachable!(),
         };
 
-        if !errors.is_empty() {
-            Err(Error::multiple(errors))
-        } else {
+        if errors.is_empty() {
             Ok(self)
+        } else {
+            Err(Error::multiple(errors))
         }
     }
 

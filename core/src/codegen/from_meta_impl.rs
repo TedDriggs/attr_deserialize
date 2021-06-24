@@ -79,14 +79,14 @@ impl<'a> ToTokens for FromMetaImpl<'a> {
                 let unit_arms = variants.iter().map(Variant::as_unit_match_arm);
                 let struct_arms = variants.iter().map(Variant::as_data_match_arm);
 
-                let unknown_variant_err = if !variants.is_empty() {
+                let unknown_variant_err = if variants.is_empty() {
+                    quote! {
+                        unknown_field(__other)
+                    }
+                } else {
                     let names = variants.iter().map(Variant::as_name);
                     quote! {
                         unknown_field_with_alts(__other, &[#(#names),*])
-                    }
-                } else {
-                    quote! {
-                        unknown_field(__other)
                     }
                 };
 

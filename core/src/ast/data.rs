@@ -130,10 +130,10 @@ impl<V: FromVariant, F: FromField> Data<V, F> {
                     }
                 }
 
-                if !errors.is_empty() {
-                    Err(Error::multiple(errors))
-                } else {
+                if errors.is_empty() {
                     Ok(Data::Enum(items))
+                } else {
+                    Err(Error::multiple(errors))
                 }
             }
             syn::Data::Struct(ref data) => Ok(Data::Struct(Fields::try_from(&data.fields)?)),
@@ -308,10 +308,10 @@ impl<F: FromField> Fields<F> {
             }
         };
 
-        if !errors.is_empty() {
-            Err(Error::multiple(errors))
-        } else {
+        if errors.is_empty() {
             Ok(Self::new(fields.into(), items).with_span(fields.span()))
+        } else {
+            Err(Error::multiple(errors))
         }
     }
 }
